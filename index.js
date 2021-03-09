@@ -68,25 +68,37 @@ function goals (state = [], action) {
   }
 }
 
-function checkAndDispatch (store, action){
+const checker = (store) => (next) => (action) => {
   if (validateBitcoin(action)) {
     return alert('Nope.')
-  } else {
-    return store.dispatch(action);
   }
+
+  return next(action);
 }
 
 function validateBitcoin(action) {
   return ((action.type === ADD_TODO &&
     action.todo.name.toLowerCase().includes('bitcoin')) ||
-  (action.type === ADD_GOAL &&
-    action.goal.name.toLowerCase().includes('bitcoin')))
+    (action.type === ADD_GOAL &&
+      action.goal.name.toLowerCase().includes('bitcoin')))
+}
+
+const logger = (store) => (next) => (action) => {
+  console.group(action.type)
+  console.log('The action: ', action)
+  const result = next(action)
+  console.log('The new state: ', store.getState())
+  console.groupEnd()
+  return result
 }
 
 const store = Redux.createStore(Redux.combineReducers({
   todos,
-  goals
-}))
+  goals,
+}), Redux.applyMiddleware(
+  checker,
+  logger
+))
 
 store.subscribe(() => {
   const { goals, todos } = store.getState();
@@ -103,7 +115,7 @@ function addTodo(){
   const name = input.value;
   input.value = '';
 
-  checkAndDispatch(store, addTodoAction({
+  store.dispatch(addTodoAction({
     name,
     id: generateId(),
     complete: false,
@@ -115,7 +127,7 @@ function addGoal(){
   const name = input.value;
   input.value = '';
 
-  checkAndDispatch(store, addGoalAction({
+  store.dispatch(addGoalAction({
     name,
     id: generateId(),
   }))
@@ -128,7 +140,7 @@ document.getElementById('goalBtn')
 
 function addTodoToDOM(todo){
   const removeBtn = createRemoveBtn(() => {
-    checkAndDispatch(store, removeTodoAction(todo.id))
+    store.dispatch(removeTodoAction(todo.id))
   });
   const node      = document.createElement('li');
   const text      = document.createTextNode(todo.name);
@@ -136,7 +148,7 @@ function addTodoToDOM(todo){
   checkbox.type = "checkbox";
   checkbox.checked = todo.complete;
   checkbox.addEventListener('click', () => {
-    checkAndDispatch(store, toggleTodoAction(todo.id));
+    store.dispatch(toggleTodoAction(todo.id));
   })
   todo.complete ? node.classList.add('completed') : null;
 
