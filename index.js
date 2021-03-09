@@ -103,12 +103,18 @@ function app (state = {}, action) {
 const store = createStore(app)
 
 store.subscribe(() => {
-  console.log('The new state is: ', store.getState())
+  const { goals, todos } = store.getState();
+
+  document.getElementById('goals').innerHTML = '';
+  document.getElementById('todos').innerHTML = '';
+
+  goals.forEach(addGoalToDom);
+  todos.forEach(addTodoToDOM);
 })
 
 function addTodo(){
   const input = document.getElementById('todo');
-  const value = input.value;
+  const name = input.value;
   input.value = '';
 
   store.dispatch(addTodoAction({
@@ -120,7 +126,7 @@ function addTodo(){
 
 function addGoal(){
   const input = document.getElementById('goal');
-  const value = input.value;
+  const name = input.value;
   input.value = '';
 
   store.dispatch(addGoalAction({
@@ -133,3 +139,30 @@ document.getElementById('todoBtn')
   .addEventListener('click', addTodo);
 document.getElementById('goalBtn')
   .addEventListener('click', addGoal);
+
+function addTodoToDOM(todo){
+  const node = document.createElement('li');
+  const text = document.createTextNode(todo.name);
+  const checkbox = document.createElement('input');
+        checkbox.type = "checkbox";
+  checkbox.addEventListener('click', () => {
+    store.dispatch(toggleTodoAction(todo.id));
+  })
+
+  node.appendChild(checkbox);
+
+  todo.complete ? node.classList.add('completed') : null;
+  node.appendChild(text);
+
+  document.getElementById('todos')
+    .appendChild(node);
+}
+
+function addGoalToDom(goal){
+  const node = document.createElement('li');
+  const text = document.createTextNode(goal.name);
+  node.appendChild(text);
+
+  document.getElementById('goals')
+    .appendChild(node);
+}
