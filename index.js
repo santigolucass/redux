@@ -68,6 +68,21 @@ function goals (state = [], action) {
   }
 }
 
+function checkAndDispatch (store, action){
+  if (validateBitcoin(action)) {
+    return alert('Nope.')
+  } else {
+    return store.dispatch(action);
+  }
+}
+
+function validateBitcoin(action) {
+  return ((action.type === ADD_TODO &&
+    action.todo.name.toLowerCase().includes('bitcoin')) ||
+  (action.type === ADD_GOAL &&
+    action.goal.name.toLowerCase().includes('bitcoin')))
+}
+
 const store = Redux.createStore(Redux.combineReducers({
   todos,
   goals
@@ -88,7 +103,7 @@ function addTodo(){
   const name = input.value;
   input.value = '';
 
-  store.dispatch(addTodoAction({
+  checkAndDispatch(store, addTodoAction({
     name,
     id: generateId(),
     complete: false,
@@ -100,7 +115,7 @@ function addGoal(){
   const name = input.value;
   input.value = '';
 
-  store.dispatch(addGoalAction({
+  checkAndDispatch(store, addGoalAction({
     name,
     id: generateId(),
   }))
@@ -113,7 +128,7 @@ document.getElementById('goalBtn')
 
 function addTodoToDOM(todo){
   const removeBtn = createRemoveBtn(() => {
-    store.dispatch(removeTodoAction(todo.id))
+    checkAndDispatch(store, removeTodoAction(todo.id))
   });
   const node      = document.createElement('li');
   const text      = document.createTextNode(todo.name);
@@ -121,7 +136,7 @@ function addTodoToDOM(todo){
   checkbox.type = "checkbox";
   checkbox.checked = todo.complete;
   checkbox.addEventListener('click', () => {
-    store.dispatch(toggleTodoAction(todo.id));
+    checkAndDispatch(store, toggleTodoAction(todo.id));
   })
   todo.complete ? node.classList.add('completed') : null;
 
