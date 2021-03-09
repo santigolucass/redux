@@ -141,18 +141,21 @@ document.getElementById('goalBtn')
   .addEventListener('click', addGoal);
 
 function addTodoToDOM(todo){
-  const node = document.createElement('li');
-  const text = document.createTextNode(todo.name);
-  const checkbox = document.createElement('input');
-        checkbox.type = "checkbox";
+  const removeBtn = createRemoveBtn(() => {
+    store.dispatch(removeTodoAction(todo.id))
+  });
+  const node      = document.createElement('li');
+  const text      = document.createTextNode(todo.name);
+  const checkbox  = document.createElement('input');
+  checkbox.type = "checkbox";
   checkbox.addEventListener('click', () => {
     store.dispatch(toggleTodoAction(todo.id));
   })
+  todo.complete ? node.classList.add('completed') : null;
 
   node.appendChild(checkbox);
-
-  todo.complete ? node.classList.add('completed') : null;
   node.appendChild(text);
+  node.appendChild(removeBtn)
 
   document.getElementById('todos')
     .appendChild(node);
@@ -165,4 +168,12 @@ function addGoalToDom(goal){
 
   document.getElementById('goals')
     .appendChild(node);
+}
+
+function createRemoveBtn(onClick){
+  const btn = document.createElement('button');
+  btn.innerHTML = 'X';
+  btn.addEventListener('click', onClick);
+
+  return btn;
 }
