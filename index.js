@@ -2,31 +2,6 @@ function generateId () {
   return Math.random().toString(36).substring(2) + (new Date()).getTime().toString(36);
 }
 
-function createStore (reducer) {
-  let state
-  let listeners = []
-
-  const getState = () => state
-
-  const subscribe = (listener) => {
-    listeners.push(listener)
-    return () => {
-      listeners = listeners.filter((l) => l !== listener)
-    }
-  }
-
-  const dispatch = (action) => {
-    state = reducer(state, action)
-    listeners.forEach((listener) => listener())
-  }
-
-  return {
-    getState,
-    subscribe,
-    dispatch,
-  }
-}
-
 const ADD_TODO = 'ADD_TODO'
 const REMOVE_TODO = 'REMOVE_TODO'
 const TOGGLE_TODO = 'TOGGLE_TODO'
@@ -93,14 +68,10 @@ function goals (state = [], action) {
   }
 }
 
-function app (state = {}, action) {
-  return {
-    todos: todos(state.todos, action),
-    goals: goals(state.goals, action),
-  }
-}
-
-const store = createStore(app)
+const store = Redux.createStore(Redux.combineReducers({
+  todos,
+  goals
+}))
 
 store.subscribe(() => {
   const { goals, todos } = store.getState();
@@ -148,6 +119,7 @@ function addTodoToDOM(todo){
   const text      = document.createTextNode(todo.name);
   const checkbox  = document.createElement('input');
   checkbox.type = "checkbox";
+  checkbox.checked = todo.complete;
   checkbox.addEventListener('click', () => {
     store.dispatch(toggleTodoAction(todo.id));
   })
@@ -177,3 +149,36 @@ function createRemoveBtn(onClick){
 
   return btn;
 }
+
+// function createStore (reducer) {
+//   let state
+//   let listeners = []
+//
+//   const getState = () => state
+//
+//   const subscribe = (listener) => {
+//     listeners.push(listener)
+//     return () => {
+//       listeners = listeners.filter((l) => l !== listener)
+//     }
+//   }
+//
+//   const dispatch = (action) => {
+//     state = reducer(state, action)
+//     listeners.forEach((listener) => listener())
+//   }
+//
+//   return {
+//     getState,
+//     subscribe,
+//     dispatch,
+//   }
+// }
+//
+// function app (state = {}, action) {
+//   return {
+//     todos: todos(state.todos, action),
+//     goals: goals(state.goals, action),
+//   }
+// }
+
