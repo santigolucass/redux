@@ -32,7 +32,18 @@
     <script type="text/javascript" src="index.js"></script>
     <script type="text/babel">
       function List(props) {
-        return <ul>List</ul>;
+        return (
+          <ul>
+            {props.items.map((item) => (
+              <li key={item.id}>
+                <span>{item.name}</span>
+              <button onClick={() => props.remove(item.id)}>
+                X
+              </button>
+              </li>
+            ))}
+          </ul>
+        );
       }
 
       class Todos extends React.Component {
@@ -49,6 +60,13 @@
             })
           );
         };
+
+        removeItem = (id) => {
+          this.props.store.dispatch(
+          removeTodoAction(id)
+          )
+        }
+
         render() {
           return (
             <div>
@@ -59,7 +77,7 @@
                 ref={(input) => (this.input = input)}
               />
               <button onClick={this.addItem}>Add Todo</button>
-              <List />
+              <List items={this.props.todos} remove={this.removeItem}/>
             </div>
           );
         }
@@ -88,20 +106,20 @@
                 ref={(input) => (this.input = input)}
               />
               <button onClick={this.addGoal}>Add Goal</button>
-              <List />
+              <List items={this.props.goals} />
             </div>
           );
         }
       }
 
       class App extends React.Component {
-      componentDidMount() {
-      const { store } = this.props;
-      store.subscribe(() => this.forceUpdate())
-      }
+        componentDidMount() {
+          const { store } = this.props;
+          store.subscribe(() => this.forceUpdate());
+        }
         render() {
-        const { store } = this.props;
-        const { todos, goals } = store.getState();
+          const { store } = this.props;
+          const { todos, goals } = store.getState();
           return (
             <div>
               <Todos todos={todos} store={this.props.store} />
