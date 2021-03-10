@@ -2,15 +2,11 @@
   <head>
     <title>Udacity Todos Goals</title>
   </head>
-  <style>
-    .completed {
-      text-decoration: line-through;
-    }
-  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.7.2/redux.min.js"></script>
   <script src="https://unpkg.com/react@16.3.0-alpha.1/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <script src="https://tylermcginnis.com/goals-todos-api/index.js"></script>
   <body>
     <div id="app"></div>
 
@@ -21,13 +17,15 @@
           <ul>
             {props.items.map((item) => (
               <li key={item.id}>
-                <input type='checkbox' onClick={() => props.toggle && props.toggle(item.id)}/>
-                <span style={{textDecoration: item.complete ? 'completed' : 'none'}}>
-                {item.name}
+                <span
+                  onClick={() => props.toggle && props.toggle(item.id)}
+                  style={{
+                    textDecoration: item.complete ? "line-through" : "none",
+                  }}
+                >
+                  {item.name}
                 </span>
-              <button onClick={() => props.remove(item.id)}>
-                X
-              </button>
+                <button onClick={() => props.remove(item.id)}>X</button>
               </li>
             ))}
           </ul>
@@ -50,16 +48,12 @@
         };
 
         removeItem = (id) => {
-          this.props.store.dispatch(
-          removeTodoAction(id)
-          )
-        }
+          this.props.store.dispatch(removeTodoAction(id));
+        };
 
         toggleItem = (id) => {
-          this.props.store.dispatch(
-          toggleTodoAction(id)
-          )
-        }
+          this.props.store.dispatch(toggleTodoAction(id));
+        };
 
         render() {
           return (
@@ -74,7 +68,8 @@
               <List
                 items={this.props.todos}
                 remove={this.removeItem}
-                toggle={this.toggleItem}/>
+                toggle={this.toggleItem}
+              />
             </div>
           );
         }
@@ -111,12 +106,21 @@
 
       class App extends React.Component {
         componentDidMount() {
+          Promise.all([API.fetchTodos(), API.fetchGoals()]).then(
+            ([todos, goals]) => {
+              store.dispatch(receiveDataAction(todos, goals));
+            }
+          );
+
           const { store } = this.props;
           store.subscribe(() => this.forceUpdate());
         }
         render() {
           const { store } = this.props;
-          const { todos, goals } = store.getState();
+          const { todos, goals, loading } = store.getState();
+          if (loading === true) {
+            return <div>Loading</div>;
+          }
           return (
             <div>
               <Todos todos={todos} store={this.props.store} />
