@@ -36,15 +36,15 @@
         addItem = (e) => {
           e.preventDefault();
           const name = this.input.value;
-          this.input.value = "";
 
-          this.props.store.dispatch(
-            addTodoAction({
-              name,
-              id: generateId(),
-              complete: false,
+          API.saveTodo(this.input.value)
+            .then((todo) => {
+              this.props.store.dispatch(addTodoAction(todo));
+              this.input.value = "";
             })
-          );
+            .catch(() => {
+              alert("Error");
+            });
         };
 
         removeTodo = (todo) => {
@@ -58,6 +58,11 @@
 
         toggleItem = (id) => {
           this.props.store.dispatch(toggleTodoAction(id));
+
+          API.saveTodoToggle(id).catch(() => {
+            this.props.store.dispatch(toggleTodoAction(id));
+            alert("Error");
+          });
         };
 
         render() {
@@ -83,25 +88,26 @@
       class Goals extends React.Component {
         addGoal = (e) => {
           e.preventDefault();
-          const name = this.input.value;
-          this.input.value = "";
 
-          this.props.store.dispatch(
-            addGoalAction({
-              name,
-              id: generateId(),
+          API.saveGoal(this.input.value)
+            .then((goal) => {
+              this.props.store.dispatch(addGoalAction(goal));
+              this.input.value = "";
             })
-          );
-
-          removeGoal = (goal) => {
-            this.props.store.dispatch(removeGoalAction(goal.id));
-
-            return API.deleteGoal(goal.id).catch(() => {
-              this.props.store.dispatch(addTodoAction(goal));
+            .catch(() => {
               alert("Error");
             });
-          };
         };
+
+        removeGoal = (goal) => {
+          this.props.store.dispatch(removeGoalAction(goal.id));
+
+          return API.deleteGoal(goal.id).catch(() => {
+            this.props.store.dispatch(addGoalAction(goal));
+            alert("An error occurred. Try again.");
+          });
+        };
+
         render() {
           return (
             <div>
