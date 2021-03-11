@@ -25,7 +25,7 @@
                 >
                   {item.name}
                 </span>
-                <button onClick={() => props.remove(item.id)}>X</button>
+                <button onClick={() => props.remove(item)}>X</button>
               </li>
             ))}
           </ul>
@@ -47,8 +47,13 @@
           );
         };
 
-        removeItem = (id) => {
-          this.props.store.dispatch(removeTodoAction(id));
+        removeTodo = (todo) => {
+          this.props.store.dispatch(removeTodoAction(todo.id));
+
+          return API.deleteTodo(todo.id).catch(() => {
+            this.props.store.dispatch(addTodoAction(todo));
+            alert("Error");
+          });
         };
 
         toggleItem = (id) => {
@@ -67,7 +72,7 @@
               <button onClick={this.addItem}>Add Todo</button>
               <List
                 items={this.props.todos}
-                remove={this.removeItem}
+                remove={this.removeTodo}
                 toggle={this.toggleItem}
               />
             </div>
@@ -87,6 +92,15 @@
               id: generateId(),
             })
           );
+
+          removeGoal = (goal) => {
+            this.props.store.dispatch(removeGoalAction(goal.id));
+
+            return API.deleteGoal(goal.id).catch(() => {
+              this.props.store.dispatch(addTodoAction(goal));
+              alert("Error");
+            });
+          };
         };
         render() {
           return (
@@ -98,7 +112,7 @@
                 ref={(input) => (this.input = input)}
               />
               <button onClick={this.addGoal}>Add Goal</button>
-              <List items={this.props.goals} />
+              <List items={this.props.goals} remove={this.removeGoal} />
             </div>
           );
         }
